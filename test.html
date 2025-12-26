@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="视频解析">
+    <meta name="theme-color" content="#141414">
+    <meta name="description" content="免费在线视频解析，支持爱奇艺、腾讯、优酷等多个平台">
+    <title>视频解析 - 在线播放</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body { 
+            width: 100%;
+            height: 100%;
+            touch-action: manipulation;
+        }
+        
+        body { 
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%); 
+            color: #fff; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 15px;
+            width: 100%;
+        }
+        
+        /* Header样式 */
+        .header { 
+            text-align: center; 
+            padding: 20px 0 15px 0; 
+            border-bottom: 2px solid #333; 
+            margin-bottom: 20px;
+        }
+        .header h1 { 
+            font-size: clamp(1.5em, 5vw, 2.5em); 
+            margin-bottom: 8px; 
+            color: #00d4ff; 
+            text-shadow: 0 0 10px rgba(0,212,255,0.3);
+            word-break: break-word;
+        }
+        .header p { 
+            font-size: clamp(0.9em, 3vw, 1.1em); 
+            color: #aaa; 
+        }
+        
+        /* 搜索框样式 */
+        .search-box { 
+            margin: 20px 0; 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap;
+            align-items: stretch;
+        }
+        
+        input { 
+            padding: 14px 12px; 
+            flex: 1; 
+            min-width: 200px;
+            border-radius: 8px; 
+            border: 2px solid #333;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        input:focus { 
+            outline: none; 
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0,212,255,0.2);
+        }
+        
+        input::placeholder {
+            color: #666;
+        }
+        
+        select { 
+            padding: 14px 12px; 
+            border-radius: 8px; 
+            border: 2px solid #333;
+            background: #1a1a1a;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 20px;
+            padding-right: 35px;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+        
+        /* 按钮样式 */
+        button { 
+            padding: 14px 20px; 
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: #fff; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 16px;
+            -webkit-appearance: none;
+            appearance: none;
+            min-height: 44px;
+            white-space: nowrap;
+        }
+        
+        button:hover { 
+            background: linear-gradient(135deg, #0052a3 0%, #003d7a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,102,204,0.3);
+        }
+        
+        button:active { 
+            transform: translateY(0);
+            opacity: 0.9;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 接口状态栏 */
+        .api-status-bar {
+            margin: 15px 0;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .api-status-bar h3 {
+            margin-bottom: 10px;
+            font-size: clamp(0.95em, 2.5vw, 1.1em);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .check-btn {
+            padding: 10px 14px;
+            background: #4CAF50;
+            margin-top: 10px;
+            font-size: 0.9em;
+            width: 100%;
+        }
+        
+        .check-btn:hover { background: #45a049; }
+        
+        .api-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .api-item {
+            padding: 10px;
+            background: #0a0a0a;
+            border-radius: 6px;
+            border-left: 3px solid #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .api-item.loading { border-left-color: #ff9800; }
+        .api-item.success { 
+            border-left-color: #4CAF50; 
+            background: rgba(76, 175, 80, 0.1);
+        }
+        .api-item.failed { 
+            border-left-color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+        
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+            margin-right: 6px;
+            flex-shrink: 0;
+        }
+        
+        .status-dot.loading {
+            background: #ff9800;
+            animation: pulse 1s infinite;
+        }
+        
+        .status-dot.success { background: #4CAF50; }
+        .status-dot.failed { background: #f44336; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* 播放器样式 */
+        .player { 
+            background: #000; 
+            aspect-ratio: 16 / 9; 
+            border-radius: 8px; 
+            margin: 15px 0;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            width: 100%;
+        }
+        
+        iframe { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            border-radius: 8px; 
+        }
+        
+        /* 信息区域样式 */
+        .info { 
+            margin-top: 20px; 
+            background: #0a0a0a; 
+            padding: 15px; 
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        h2 { 
+            margin: 15px 0 8px 0; 
+            font-size: clamp(1.1em, 3vw, 1.3em);
+            color: #00d4ff;
+            border-bottom: 2px solid #333;
+            padding-bottom: 6px;
+        }
+        
+        h2:first-child { margin-top: 0; }
+        
+        .info p { 
+            line-height: 1.8; 
+            margin: 6px 0;
+            color: #ccc;
+            font-size: 0.95em;
+        }
+        
+        /* 快捷操作 */
+        .quick-actions {
+            margin: 15px 0;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .quick-btn {
+            padding: 10px 14px;
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 100px;
+            max-width: 150px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        .quick-btn:hover {
+            background: #00d4ff;
+            color: #000;
+            border-color: #00d4ff;
+        }
+        
+        .quick-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* 加载动画 */
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #ff9800;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 通知提示 */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            z-index: 1000;
+            max-width: 90%;
+            word-break: break-word;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .container { padding: 10px; }
+            
+            .header { 
+                padding: 15px 0 10px 0; 
+                margin-bottom: 15px;
+            }
+            
+            .search-box { 
+                gap: 6px;
+                margin: 15px 0;
+            }
+            
+            input, select, button { 
+                min-height: 48px;
+                font-size: 16px;
+            }
+            
+            .api-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                margin: 10px 0;
+                gap: 6px;
+                padding: 8px;
+            }
+            
+            .quick-btn {
+                flex: 1;
+                min-width: auto;
+                max-width: none;
+            }
+            
+            .info { 
+                padding: 12px; 
+                margin-top: 15px;
+            }
+            
+            .api-status-bar {
+                padding: 12px;
+                margin: 12px 0;
+            }
+            
+            .player {
+                margin: 12px 0;
+                aspect-ratio: 16 / 9;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .api-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* 深色模式优化 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            }
+        }
+        
+        /* 省流量模式 */
+        @media (prefers-reduced-data: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+        
+        /* 横屏优化 */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .header { 
+                padding: 8px 0; 
+                margin-bottom: 10px;
+            }
+            
+            .header h1 { margin-bottom: 4px; }
+            
+            .player {
+                max-height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 视频解析</h1>
+            <p>支持多个视频平台的在线解析播放</p>
+        </div>
+        
+        <!-- 接口状态检测 -->
+        <div class="api-status-bar">
+            <h3><span class="status-dot"></span>接口状态检测</h3>
+            <div class="api-list" id="apiList"></div>
+            <button class="check-btn" onclick="checkAllApis()">🔍 检测所有接口</button>
+        </div>
+        
+        <!-- 搜索框 -->
+        <div class="search-box">
+            <input type="text" id="url" placeholder="粘贴视频网址到此处" autocomplete="off" onkeypress="if(event.key==='Enter') play()">
+            <select id="jk"></select>
+            <button onclick="play()">▶ 解析播放</button>
+        </div>
+        
+        <!-- 快捷操作 -->
+        <div class="quick-actions">
+            <button class="quick-btn" onclick="clearInput()">🧹 清空输入</button>
+            <button class="quick-btn" onclick="copyCurrentUrl()">📋 复制链接</button>
+        </div>
+        
+        <!-- 播放器 -->
+        <div class="player">
+            <iframe id="playbox" src="about:blank"></iframe>
+        </div>
+        
+        <!-- 使用说明 -->
+        <div class="info">
+            <h2>📖 使用说明</h2>
+            <p>1️⃣ 在视频网站复制视频链接</p>
+            <p>2️⃣ 粘贴到上面的输入框</p>
+            <p>3️⃣ 点击"解析播放"按钮</p>
+            <p>4️⃣ 耐心等待数秒，视频将自动播放</p>
+            <p>5️⃣ 如播放失败，请先检测接口状态，然后切换线路重试</p>
+            
+            <h2>🎥 支持的视频平台</h2>
+            <p>爱奇艺 | 腾讯视频 | 优酷 | 芒果TV | 乐视视频 | 搜狐视频 | B站 | A站 等</p>
+            
+            <h2>⚙️ 快速提示</h2>
+            <p>• 某些接口可能在特定地区或时间不可用，请尝试其他线路</p>
+            <p>• 可按回车键快速提交解析</p>
+            <p>• 定期检测接口状态，使用可用的接口能提高成功率</p>
+        </div>
+    </div>
+    
+    <script>
+    // 解析接口列表
+    const apis = [
+        { name: "默认一", url: "https://jx.xmflv.com/?url=" },
+        { name: "国内线路", url: "https://jx.nnxv.cn/tv.php?url=" },
+        { name: "剧名/链接", url: "https://jx.2s0.cn/player/?url=" },
+        { name: "备用线路", url: "https://jx.xmflv.cc/?url=" },
+        { name: "线路五", url: "https://jx.playerjy.com/?url=" },
+        { name: "OK解析", url: "https://okjx.cc/?url=" }
+    ];
+
+    // 移动端检测
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
+    // 本地存储辅助函数
+    const storage = {
+        set: (key, value) => {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch(e) {
+                console.warn('本地存储失败:', e);
+            }
+        },
+        get: (key, defaultValue) => {
+            try {
+                const value = localStorage.getItem(key);
+                return value ? JSON.parse(value) : defaultValue;
+            } catch(e) {
+                return defaultValue;
+            }
+        }
+    };
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeApis();
+        setupMobileOptimizations();
+        addEventListeners();
+        
+        // 页面加载完成后自动检测一次接口
+        setTimeout(() => checkAllApis(), 500);
+        
+        // 添加Safari刘海屏适配
+        if (isIOS) {
+            document.documentElement.style.paddingTop = 'env(safe-area-inset-top)';
+            document.documentElement.style.paddingBottom = 'env(safe-area-inset-bottom)';
+        }
+    });
+
+    // 移动端优化设置
+    function setupMobileOptimizations() {
+        if (!isMobile) return;
+        
+        // 防止双击缩放
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+        
+        // 禁用长按菜单
+        document.addEventListener('contextmenu', function(e) {
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        }, false);
+        
+        // 隐藏地址栏（可选）
+        window.addEventListener('load', () => {
+            setTimeout(() => window.scrollTo(0, 1), 100);
+        });
+    }
+
+    // 添加事件监听
+    function addEventListeners() {
+        const urlInput = document.getElementById('url');
+        
+        // 从剪贴板读取（移动端友好）
+        if (navigator.clipboard) {
+            // 长按输入框自动粘贴（移动端）
+            urlInput.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 1 && isMobile) {
+                    // 触摸时清除提示
+                    if (this.value === '') {
+                        this.placeholder = '输入或粘贴视频网址';
+                    }
+                }
+            });
+        }
+        
+        // 防止iOS输入法问题
+        if (isIOS) {
+            urlInput.addEventListener('focus', () => {
+                setTimeout(() => {
+                    window.scrollTo(0, document.activeElement.offsetTop - 100);
+                }, 300);
+            });
+        }
+    }
+
+    // 初始化接口列表
+    function initializeApis() {
+        const select = document.getElementById("jk");
+        const apiList = document.getElementById("apiList");
+        
+        // 清空之前的选项和列表
+        select.innerHTML = '';
+        apiList.innerHTML = '';
+        
+        // 添加选项和api项目
+        apis.forEach((api, index) => {
+            const option = document.createElement('option');
+            option.value = api.url;
+            option.textContent = api.name;
+            select.appendChild(option);
+            
+            const item = document.createElement('div');
+            item.className = 'api-item';
+            item.id = 'api-' + index;
+            item.innerHTML = `
+                <span><span class="status-dot"></span><span class="api-name">${api.name}</span></span>
+                <span class="status-text">等待检测</span>
+            `;
+            apiList.appendChild(item);
+        });
+        
+        // 恢复上次选择的接口
+        const lastApiIndex = storage.get('lastApiIndex', 0);
+        select.selectedIndex = lastApiIndex;
+    }
+
+    // 显示通知
+    function showNotification(message, duration = 2000) {
+        // 移除旧通知
+        const oldNotification = document.querySelector('.notification');
+        if (oldNotification) oldNotification.remove();
+        
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }, duration);
+    }
+
+    // 检测单个接口
+    async function checkApi(index) {
+        const api = apis[index];
+        const element = document.getElementById('api-' + index);
+        const dot = element.querySelector('.status-dot');
+        const statusText = element.querySelector('.status-text');
+        
+        // 设置加载状态
+        element.className = 'api-item loading';
+        dot.className = 'status-dot loading';
+        statusText.textContent = '检测中...';
+        
+        try {
+            // 使用带超时的fetch请求
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+            
+            const response = await fetch(api.url, {
+                method: 'HEAD',
+                mode: 'no-cors',
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            // 接口可用
+            element.className = 'api-item success';
+            dot.className = 'status-dot success';
+            statusText.textContent = '✓ 可用';
+            return true;
+        } catch (error) {
+            // 接口不可用
+            element.className = 'api-item failed';
+            dot.className = 'status-dot failed';
+            statusText.textContent = '✗ 不可用';
+            return false;
+        }
+    }
+
+    // 检测所有接口
+    async function checkAllApis() {
+        const checkBtn = document.querySelector('.check-btn');
+        const originalText = checkBtn.textContent;
+        checkBtn.disabled = true;
+        checkBtn.innerHTML = '<span class="spinner"></span> 检测中...';
+        
+        console.log('开始检测所有接口...');
+        const results = [];
+        
+        for (let i = 0; i < apis.length; i++) {
+            const result = await checkApi(i);
+            results.push(result);
+            // 错开请求，避免同时发送过多请求
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+        
+        // 统计结果
+        const availableCount = results.filter(r => r).length;
+        const statusBar = document.querySelector('.api-status-bar h3 .status-dot');
+        
+        if (availableCount > 0) {
+            statusBar.className = 'status-dot success';
+            showNotification(`✓ 检测完成: ${availableCount}/${apis.length} 个接口可用`, 3000);
+        } else {
+            statusBar.className = 'status-dot failed';
+            showNotification('✗ 无可用接口，请稍后重试', 3000);
+        }
+        
+        // 恢复按钮
+        checkBtn.disabled = false;
+        checkBtn.textContent = originalText;
+        
+        console.log(`检测完成: ${availableCount}/${apis.length} 个接口可用`);
+    }
+
+    // 播放视频
+    function play() {
+        const url = document.getElementById("url").value.trim();
+        const select = document.getElementById("jk");
+        
+        if (!url) {
+            showNotification("❌ 请输入视频链接");
+            return;
+        }
+        
+        // 验证URL格式
+        try {
+            new URL('http://' + url);
+        } catch (e) {
+            showNotification("❌ 链接格式不正确");
+            return;
+        }
+        
+        // 保存上次选择
+        storage.set('lastApiIndex', select.selectedIndex);
+        storage.set('lastUrl', url);
+        
+        const jk = select.value;
+        const selectedOption = select.options[select.selectedIndex];
+        console.log(`正在使用接口: ${selectedOption.textContent} 解析链接: ${url}`);
+        
+        showNotification(`⏳ 正在加载，请稍候...`);
+        document.getElementById("playbox").src = jk + encodeURIComponent(url);
+    }
+
+    // 清空输入
+    function clearInput() {
+        document.getElementById("url").value = '';
+        document.getElementById("url").focus();
+        showNotification("✓ 已清空");
+    }
+
+    // 复制当前URL
+    function copyCurrentUrl() {
+        const url = document.getElementById("url").value.trim();
+        if (!url) {
+            showNotification("❌ 没有链接可复制");
+            return;
+        }
+        
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(url).then(() => {
+                showNotification("✓ 链接已复制");
+            }).catch(err => {
+                // 备用方案
+                fallbackCopy(url);
+            });
+        } else {
+            fallbackCopy(url);
+        }
+    }
+
+    // 复制备用方案
+    function fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showNotification("✓ 链接已复制");
+        } catch (err) {
+            showNotification("❌ 复制失败");
+        }
+        document.body.removeChild(textarea);
+    }
+
+    // 处理浏览器回退
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            console.log('页面从缓存中恢复');
+        }
+    });
+
+    // 处理应用最小化恢复
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            console.log('应用已恢复焦点');
+        }
+    });
+    </script>
+</body>
+</html>
