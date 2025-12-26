@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#141414">
+    <meta name="description" content="免费在线视频解析，支持爱奇艺、腾讯、优酷等多个平台">
+    <title>🎬 视频解析 - 在线播放</title>
+    <link rel="stylesheet" href="css/css.css?v=2.0.0" />
+    <style>
+        /* 简化的样式，与css.css配合使用 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body { 
+            width: 100%;
+            height: 100%;
+            touch-action: manipulation;
+        }
+        
+        body { 
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%); 
+            color: #fff; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 15px; width: 100%; }
+        
+        .header { 
+            text-align: center; 
+            padding: 20px 0 15px 0; 
+            border-bottom: 2px solid #333; 
+            margin-bottom: 20px;
+        }
+        
+        .header h1 { 
+            font-size: clamp(1.5em, 5vw, 2.5em); 
+            margin-bottom: 8px; 
+            color: #00d4ff; 
+            text-shadow: 0 0 10px rgba(0,212,255,0.3);
+        }
+        
+        .header p { font-size: clamp(0.9em, 3vw, 1.1em); color: #aaa; }
+        
+        .search-box { 
+            margin: 20px 0; 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap;
+            align-items: stretch;
+        }
+        
+        input, select { 
+            padding: 14px 12px; 
+            border-radius: 8px; 
+            border: 2px solid #333;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 16px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        input { flex: 1; min-width: 200px; }
+        input:focus, select:focus { outline: none; border-color: #00d4ff; }
+        
+        select { min-width: 120px; }
+        
+        button { 
+            padding: 14px 20px; 
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: #fff; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            -webkit-appearance: none;
+            appearance: none;
+            min-height: 44px;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+        
+        button:hover { 
+            background: linear-gradient(135deg, #0052a3 0%, #003d7a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,102,204,0.3);
+        }
+        
+        button:active { transform: translateY(0); opacity: 0.9; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .api-status-bar {
+            margin: 15px 0;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .api-status-bar h3 {
+            margin-bottom: 10px;
+            font-size: clamp(0.95em, 2.5vw, 1.1em);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .check-btn {
+            padding: 10px 14px;
+            background: #4CAF50;
+            margin-top: 10px;
+            font-size: 0.9em;
+            width: 100%;
+        }
+        
+        .check-btn:hover { background: #45a049; }
+        
+        .api-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .api-item {
+            padding: 10px;
+            background: #0a0a0a;
+            border-radius: 6px;
+            border-left: 3px solid #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+        }
+        
+        .api-item.loading { border-left-color: #ff9800; }
+        .api-item.success { 
+            border-left-color: #4CAF50; 
+            background: rgba(76, 175, 80, 0.1);
+        }
+        .api-item.failed { 
+            border-left-color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+        
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+            margin-right: 6px;
+        }
+        
+        .status-dot.loading { background: #ff9800; animation: pulse 1s infinite; }
+        .status-dot.success { background: #4CAF50; }
+        .status-dot.failed { background: #f44336; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .player { 
+            background: #000; 
+            aspect-ratio: 16 / 9; 
+            border-radius: 8px; 
+            margin: 15px 0;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            width: 100%;
+        }
+        
+        iframe { width: 100%; height: 100%; border: none; border-radius: 8px; }
+        
+        .quick-actions {
+            margin: 15px 0;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .quick-btn {
+            padding: 10px 14px;
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 80px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        .quick-btn:hover {
+            background: #00d4ff;
+            color: #000;
+            border-color: #00d4ff;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            z-index: 1000;
+            max-width: 90%;
+            word-break: break-word;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .info { 
+            margin-top: 20px; 
+            background: #0a0a0a; 
+            padding: 15px; 
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        h2 { 
+            margin: 15px 0 8px 0; 
+            font-size: clamp(1.1em, 3vw, 1.3em);
+            color: #00d4ff;
+            border-bottom: 2px solid #333;
+            padding-bottom: 6px;
+        }
+        
+        .info p { 
+            line-height: 1.8; 
+            margin: 6px 0;
+            color: #ccc;
+            font-size: 0.95em;
+        }
+        
+        @media (max-width: 480px) {
+            input, select, button { 
+                min-height: 48px;
+                font-size: 16px;
+            }
+            
+            .api-list { grid-template-columns: 1fr; }
+            .quick-btn { flex: 1; min-width: auto; }
+        }
+        
+        @media (max-width: 768px) {
+            .api-list { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (orientation: landscape) and (max-height: 500px) {
+            .header { padding: 8px 0; margin-bottom: 10px; }
+            .header h1 { margin-bottom: 4px; }
+            .player { max-height: 350px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 视频解析</h1>
+            <p>支持多个视频平台的在线解析播放</p>
+        </div>
+        
+        <!-- 接口状态检测 -->
+        <div class="api-status-bar">
+            <h3><span class="status-dot"></span>接口状态检测</h3>
+            <div class="api-list" id="apiList"></div>
+            <button class="check-btn" onclick="checkAllApis()">🔍 检测所有接口</button>
+        </div>
+        
+        <!-- 搜索框 -->
+        <div class="search-box">
+            <input type="text" id="url" placeholder="粘贴视频网址到此处" autocomplete="off">
+            <select id="jk"></select>
+            <button onclick="play()">▶ 解析播放</button>
+        </div>
+        
+        <!-- 快捷操作 -->
+        <div class="quick-actions">
+            <button class="quick-btn" onclick="clearInput()">🧹 清空输入</button>
+            <button class="quick-btn" onclick="copyCurrentUrl()">📋 复制链接</button>
+            <button class="quick-btn" onclick="shareLink()">🔗 分享</button>
+        </div>
+        
+        <!-- 播放器 -->
+        <div class="player">
+            <iframe id="playbox" src="about:blank"></iframe>
+        </div>
+        
+        <!-- 使用说明 -->
+        <div class="info">
+            <h2>📖 使用说明</h2>
+            <p>1️⃣ 在视频网站复制视频链接</p>
+            <p>2️⃣ 粘贴到上面的输入框</p>
+            <p>3️⃣ 点击"解析播放"按钮（或按回车键）</p>
+            <p>4️⃣ 耐心等待数秒，视频将自动播放</p>
+            <p>5️⃣ 如播放失败，请先检测接口状态，然后切换线路重试</p>
+            <p>💡 点击"分享"可生成分享链接，方便分享给朋友</p>
+            
+            <h2>🎥 支持的视频平台</h2>
+            <p>爱奇艺 | 腾讯视频 | 优酷 | 芒果TV | 乐视视频 | 搜狐视频 | B站 | A站 等</p>
+        </div>
+    </div>
+
+    <!-- 加载所有模块（无jQuery依赖） -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/ui.js"></script>
+    
+    <!-- 初始化应用 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化各个模块
+            API.init();
+            Player.handleUrlParams();
+            UI.init();
+            
+            // 自动检测接口
+            setTimeout(() => API.checkAll(), 500);
+        });
+    </script>
+</body>
+</html>
