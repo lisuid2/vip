@@ -6,12 +6,12 @@
 const API = {
   // 所有可用的解析接口列表
   list: [
-    { name: "默认一", url: "https://jx.xmflv.com/?url=" },
+    { name: "虾米解析", url: "https://jx.xmflv.com/?url=" },
     { name: "国内线路", url: "https://jx.nnxv.cn/tv.php?url=" },
-    { name: "剧名/链接", url: "https://jx.2s0.cn/player/?url=" },
+    { name: "线路", url: "https://jx.m3u8.tv/jiexi/?url=" },
     { name: "备用线路", url: "https://jx.xmflv.cc/?url=" },
     { name: "线路五", url: "https://jx.playerjy.com/?url=" },
-    { name: "OK解析", url: "https://okjx.cc/?url=" }
+    { name: "OK解析", url: "https://okjx.cc/?url=" },
   ],
 
   // 初始化API列表UI
