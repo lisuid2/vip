@@ -1,492 +1,258 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#141414">
-    <meta name="description" content="免费在线视频解析，支持爱奇艺、腾讯、优酷等多个平台">
-    <title>🎬 视频解析 - 在线播放</title>
-    <link rel="manifest" href="manifest.json" />
-    
-    <!-- 预连接到CDN和API域名 -->
-    <link rel="preconnect" href="https://jx.xmflv.com" crossorigin />
-    <link rel="preconnect" href="https://jx.nnxv.cn" crossorigin />
-    <link rel="dns-prefetch" href="https://jx.m3u8.tv" />
-    <link rel="dns-prefetch" href="https://jx.xmflv.cc" />
-    <link rel="dns-prefetch" href="https://jx.playerjy.com" />
-    <link rel="dns-prefetch" href="https://okjx.cc" />
-    
-    <!-- 字体优化：使用 system font stack，避免加载自定义字体 -->
-    <style>
-        /* 定义系统字体堆栈和 Unicode Range 分割 */
-        @font-face {
-            font-family: 'system-ui';
-            src: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        }
-    </style>
-    
-    <link rel="stylesheet" href="css/css.css?v=2.0.0" />
-    <style>
-        /* 简化的样式，与css.css配合使用 */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        html, body { 
-            width: 100%;
-            height: 100%;
-            touch-action: manipulation;
-        }
-        
-        body { 
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%); 
-            color: #fff; 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -webkit-tap-highlight-color: transparent;
-            overflow-x: hidden;
-        }
-        
-        .container { max-width: 1200px; margin: 0 auto; padding: 15px; width: 100%; }
-        
-        .header { 
-            text-align: center; 
-            padding: 20px 0 15px 0; 
-            border-bottom: 2px solid #333; 
-            margin-bottom: 20px;
-        }
-        
-        .header h1 { 
-            font-size: clamp(1.5em, 5vw, 2.5em); 
-            margin-bottom: 8px; 
-            color: #00d4ff; 
-            text-shadow: 0 0 10px rgba(0,212,255,0.3);
-        }
-        
-        .header p { font-size: clamp(0.9em, 3vw, 1.1em); color: #aaa; }
-        
-        .search-box { 
-            margin: 20px 0; 
-            display: flex; 
-            gap: 8px; 
-            flex-wrap: wrap;
-            align-items: stretch;
-        }
-        
-        input, select { 
-            padding: 14px 12px; 
-            border-radius: 8px; 
-            border: 2px solid #333;
-            background: #1a1a1a;
-            color: #fff;
-            font-size: 16px;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        
-        input { flex: 1; min-width: 200px; }
-        input:focus, select:focus { outline: none; border-color: #00d4ff; }
-        
-        select { min-width: 120px; }
-        
-        button { 
-            padding: 14px 20px; 
-            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
-            color: #fff; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            -webkit-appearance: none;
-            appearance: none;
-            min-height: 44px;
-            white-space: nowrap;
-            transition: all 0.3s;
-        }
-        
-        button:hover { 
-            background: linear-gradient(135deg, #0052a3 0%, #003d7a 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,102,204,0.3);
-        }
-        
-        button:active { transform: translateY(0); opacity: 0.9; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .api-status-bar {
-            margin: 15px 0;
-            padding: 15px;
-            background: #1a1a1a;
-            border-radius: 8px;
-            border-left: 4px solid #ff6b6b;
-        }
-        
-        .api-status-bar h3 {
-            margin-bottom: 10px;
-            font-size: clamp(0.95em, 2.5vw, 1.1em);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .check-btn {
-            padding: 10px 14px;
-            background: #4CAF50;
-            margin-top: 10px;
-            font-size: 0.9em;
-            width: 100%;
-        }
-        
-        .check-btn:hover { background: #45a049; }
-        
-        .api-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .api-item {
-            padding: 10px;
-            background: #0a0a0a;
-            border-radius: 6px;
-            border-left: 3px solid #666;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85em;
-        }
-        
-        .api-item.loading { border-left-color: #ff9800; }
-        .api-item.success { 
-            border-left-color: #4CAF50; 
-            background: rgba(76, 175, 80, 0.1);
-        }
-        .api-item.failed { 
-            border-left-color: #f44336;
-            background: rgba(244, 67, 54, 0.1);
-        }
-        
-        .status-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #666;
-            margin-right: 6px;
-        }
-        
-        .status-dot.loading { background: #ff9800; animation: pulse 1s infinite; }
-        .status-dot.success { background: #4CAF50; }
-        .status-dot.failed { background: #f44336; }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .player { 
-            background: #000; 
-            aspect-ratio: 16 / 9; 
-            border-radius: 8px; 
-            margin: 15px 0;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            width: 100%;
-            position: relative;
-        }
-        
-        .player-skeleton {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
-            background-size: 200% 100%;
-            animation: skeleton-load 1.5s infinite;
-            z-index: 10;
-        }
-        
-        .skeleton-bar {
-            width: 100%;
-            height: 100%;
-            background: inherit;
-        }
-        
-        .skeleton-pulse {
-            animation: skeleton-load 1.5s infinite;
-        }
-        
-        @keyframes skeleton-load {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        iframe { width: 100%; height: 100%; border: none; border-radius: 8px; }
-        
-        .quick-actions {
-            margin: 15px 0;
-            padding: 10px;
-            background: #1a1a1a;
-            border-radius: 8px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .quick-btn {
-            padding: 10px 14px;
-            background: #333;
-            border: 1px solid #555;
-            color: #fff;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85em;
-            transition: all 0.3s;
-            flex: 1;
-            min-width: 80px;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        
-        .quick-btn:hover {
-            background: #00d4ff;
-            color: #000;
-            border-color: #00d4ff;
-        }
-        
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: #fff;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            z-index: 1000;
-            max-width: 90%;
-            word-break: break-word;
-            animation: slideUp 0.3s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from {
-                transform: translateX(-50%) translateY(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .info { 
-            margin-top: 20px; 
-            background: #0a0a0a; 
-            padding: 15px; 
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
-        
-        h2 { 
-            margin: 15px 0 8px 0; 
-            font-size: clamp(1.1em, 3vw, 1.3em);
-            color: #00d4ff;
-            border-bottom: 2px solid #333;
-            padding-bottom: 6px;
-        }
-        
-        .info p { 
-            line-height: 1.8; 
-            margin: 6px 0;
-            color: #ccc;
-            font-size: 0.95em;
-        }
-        
-        @media (max-width: 480px) {
-            input, select, button { 
-                min-height: 48px;
-                font-size: 16px;
-            }
-            
-            .api-list { grid-template-columns: 1fr; }
-            .quick-btn { flex: 1; min-width: auto; }
-        }
-        
-        @media (max-width: 768px) {
-            .api-list { grid-template-columns: repeat(2, 1fr); }
-        }
-        
-        @media (orientation: landscape) and (max-height: 500px) {
-            .header { padding: 8px 0; margin-bottom: 10px; }
-            .header h1 { margin-bottom: 4px; }
-            .player { max-height: 350px; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🎬 视频解析</h1>
-            <p>支持多个视频平台的在线解析播放</p>
-        </div>
-        
-        <!-- 接口状态检测 -->
-        <div class="api-status-bar">
-            <h3><span class="status-dot"></span>接口状态检测</h3>
-            <div class="api-list" id="apiList"></div>
-            <button class="check-btn" onclick="checkAllApis()">🔍 检测所有接口</button>
-        </div>
-        
-        <!-- 搜索框 -->
-        <div class="search-box">
-            <input type="text" id="url" placeholder="粘贴视频网址到此处" autocomplete="off">
-            <select id="jk"></select>
-            <button onclick="play()">▶ 解析播放</button>
-        </div>
-        
-        <!-- 快捷操作 -->
-        <div class="quick-actions">
-            <button class="quick-btn" onclick="clearInput()">🧹 清空输入</button>
-            <button class="quick-btn" onclick="copyCurrentUrl()">📋 复制链接</button>
-            <button class="quick-btn" onclick="shareLink()">🔗 分享</button>
-        </div>
-        
-        <!-- 播放器 -->
-        <div class="player" id="playerContainer">
-            <div class="player-skeleton" id="playerSkeleton">
-                <div class="skeleton-bar skeleton-pulse"></div>
-            </div>
-            <iframe id="playbox" src="about:blank" onload="hideSkeleton()"></iframe>
-        </div>
-        
-        <!-- 使用说明 -->
-        <div class="info">
-            <h2>📖 使用说明</h2>
-            <p>1️⃣ 在视频网站复制视频链接</p>
-            <p>2️⃣ 粘贴到上面的输入框</p>
-            <p>3️⃣ 点击"解析播放"按钮（或按回车键）</p>
-            <p>4️⃣ 耐心等待数秒，视频将自动播放</p>
-            <p>5️⃣ 如播放失败，请先检测接口状态，然后切换线路重试</p>
-            <p>💡 点击"分享"可生成分享链接，方便分享给朋友</p>
-            
-            <h2>🎥 支持的视频平台</h2>
-            <p>爱奇艺 | 腾讯视频 | 优酷 | 芒果TV | 乐视视频 | 搜狐视频 | B站 | A站 等</p>
-        </div>
-    </div>
+	<head>
+		<meta charset="utf-8" />
+		<title>努力鸭视频解析</title>
+		<meta name="keywords" content="视频解析,努力鸭" />
+		<meta name="description" content="努力鸭视频解析支持爱奇艺、腾讯视频、优酷、芒果TV、乐视视频、搜狐视频、bilibili哔哩哔哩（B站）、AcFun弹幕视频网（A站）等视频解析" />
+		<meta name=viewport content="width=device-width,initial-scale=1">
+		<link rel="stylesheet" href="css/css.css?v=1.3.0" />
+		<script type="text/javascript" src="js/jquery.js"></script>
+		<script type="text/javascript" src="js/base64.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap.js"></script>
+		<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z3065SLTMJ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-    <!-- 加载所有模块（无jQuery依赖） -->
-    <script src="js/utils.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/ui.js"></script>
-    
-    <!-- 初始化应用 -->
-    <script>
-        // 隐藏骨架屏
-        function hideSkeleton() {
-            const skeleton = document.getElementById('playerSkeleton');
-            if (skeleton) {
-                skeleton.style.display = 'none';
-            }
-        }
-        
-        // 显示骨架屏
-        function showSkeleton() {
-            const skeleton = document.getElementById('playerSkeleton');
-            if (skeleton) {
-                skeleton.style.display = 'flex';
-            }
-        }
-        
-        // 注册 Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then((registration) => {
-                        console.log('✓ Service Worker 已注册:', registration);
-                    })
-                    .catch((error) => {
-                        console.error('✗ Service Worker 注册失败:', error);
-                    });
-            });
-        }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            // 初始化各个模块
-            API.init();
-            Player.handleUrlParams();
-            UI.init();
-            
-            // 自动检测接口
-            setTimeout(() => API.checkAll(), 500);
-        });
-        
-        // 性能监测和日志
-        window.addEventListener('load', function() {
-            if (window.performance && window.performance.timing) {
-                const timing = window.performance.timing;
-                const pageLoadTime = timing.loadEventEnd - timing.navigationStart;
-                const dnsTime = timing.domainLookupEnd - timing.domainLookupStart;
-                const tcpTime = timing.connectEnd - timing.connectStart;
-                const ttfb = timing.responseStart - timing.navigationStart;
-                const renderTime = timing.domContentLoadedEventEnd - timing.navigationStart;
-                
-                const metrics = {
-                    '页面加载时间': pageLoadTime + 'ms',
-                    'DNS查询时间': dnsTime + 'ms',
-                    'TCP连接时间': tcpTime + 'ms',
-                    '首字节时间(TTFB)': ttfb + 'ms',
-                    'DOM加载时间': renderTime + 'ms'
-                };
-                
-                console.log('📊 性能指标:', metrics);
-                Storage.setWithTTL('performanceMetrics', metrics, 24 * 60);
-            }
-            
-            // Web Vitals 监测
-            try {
-                // LCP (Largest Contentful Paint)
-                const lcpObserver = new PerformanceObserver((list) => {
-                    const entries = list.getEntries();
-                    const lastEntry = entries[entries.length - 1];
-                    console.log('📊 LCP (最大内容绘制):', Math.round(lastEntry.renderTime || lastEntry.loadTime) + 'ms');
-                });
-                lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
-                
-                // FID (First Input Delay)
-                const fidObserver = new PerformanceObserver((list) => {
-                    const entries = list.getEntries();
-                    entries.forEach((entry) => {
-                        console.log('📊 FID (首次输入延迟):', Math.round(entry.processingDuration) + 'ms');
-                    });
-                });
-                fidObserver.observe({ entryTypes: ['first-input'] });
-                
-                // CLS (Cumulative Layout Shift)
-                let clsValue = 0;
-                const clsObserver = new PerformanceObserver((list) => {
-                    for (const entry of list.getEntries()) {
-                        if (!entry.hadRecentInput) {
-                            clsValue += entry.value;
-                        }
-                    }
-                    console.log('📊 CLS (累积布局偏移):', clsValue.toFixed(3));
-                });
-                clsObserver.observe({ entryTypes: ['layout-shift'] });
-            } catch (e) {
-                console.log('浏览器不支持 Web Vitals API');
-            }
-        });
-    </script>
-</body>
+  gtag('config', 'G-Z3065SLTMJ');
+</script>
+	</head>
+	<body>
+			<div id="ssi-header">
+				<div class="site_head_placeholder"></div>
+				<div class="top-nav-wrap head_inner">
+				    <div class="logo_nav">
+					<div class="header-logo-wrap" style="font-size: 20px; font-weight: bold; color: white;">🦆 视频解析</div>
+					<div class="header-nav-wrap">
+						<div id="main-top-nav-wrap">
+
+							<a href="https://www.nuliya.top/blog/jiexi.html" target="_blank" class="channel-nav-item">
+								<div class="channel-nav-text">使用教程</div>
+							</a>
+							
+							<a href="/ai" target="_blank" class="channel-nav-item" style="opacity: 0.6;">
+								<div class="channel-nav-text">AI工具</div>
+							</a>
+							
+							<a href="/tag/tv" target="_blank" class="channel-nav-item">
+<div class="channel-nav-text">电视看</div>
+</a>						</div>
+					</div>
+					</div>
+				
+					<div class="mod_search">
+						
+						<input type="text" onfocus="this.select()" id="url" class="form-control url-text" aria-label="Text input with segmented button dropdown" placeholder="粘贴视频网址到此处点击解析播放即可！" title="粘贴视频网址到此处点击解析播放即可！" autocomplete="off">
+						
+							<select class="url-c url-text" title="如发现视频无法正常播放请尝试更换视频线路！" id="jk">
+								<option value="https://jx.xmflv.com/?url=" selected>
+									默认一								</option>
+								<option value="https://jx.nnxv.cn/tv.php?url=">
+									推荐二								</option>
+								<option value="https://z1.m1907.top/?jx=">
+									剧名/链接								</option>
+								<option value="https://jx.789jiexi.com/?url=">
+									线路四								</option>
+								<option value="https://jx.playerjy.com/?url=">
+									线路五								</option>
+								<option value="https://www.yemu.xyz/?url=">
+									线路六								</option>
+								<option value="https://jx.xmflv.cc/?url=">
+									线路七								</option>
+								<option value="https://jx.hls.one/?url=">
+									线路八								</option>
+								<option value="https://jx.2s0.cn/player/?url=">
+									无法播放时								</option>
+								<option value="https://jx.789jiexi.com/?url=">
+									请切换接口								</option>
+							</select>
+
+							<button type="button" class="btn btn-default btn-play" title="点击开始解析并开始播放" onclick="play()">解析播放</button>	
+					</div>
+				</div>
+			</div>
+			<div class="play-layout">
+				<div class="page-content_left page-content">
+					<div class="container-main_left">
+						<iframe id="playbox" src="about:blank" allowtransparency="true" frameborder="0" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-modals allow-fullscreen"></iframe>
+						<!-- 提示区域 -->
+						<div id="play-tip" class="play-tip">
+							<div class="tip-content">
+								<div class="tip-title">等待播放</div>
+								<div class="tip-desc">请输入视频链接并点击解析播放</div>
+							</div>
+						</div>
+					</div>
+					<div class="bottom-module_header"><div id="tittext">欢迎使用努力鸭视频解析！</div><marquee behavior="scroll" onmouseover=this.stop() onmouseout=this.start() scrollamount="4">视频解析需耐心等待数秒；如视频未自动播放，请手动点击播放；如视频播放异常，请刷新或切换线路、更换不同平台视频网址播放！</marquee></div>
+				</div>
+				<div class="page-content_right">
+					<div class="playlist-side_main">
+						<h1>努力鸭视频解析</h1>
+						<p>努力鸭视频解析支持爱奇艺、腾讯视频、优酷、芒果TV、乐视视频、搜狐视频、bilibili哔哩哔哩（B站）、AcFun弹幕视频网（A站）等视频解析</p>
+					</div>
+					<div class="playlist-side_main">
+					    						<p>视频解析方法：使用浏览器进入视频网站，打开想要播放的视频，然后从浏览器的地址栏复制视频链接；回到本站在输入框内粘贴视频链接，再点击“解析播放”等待数秒（播放窗口显示视频时长）即可播放。---支持手机端和电脑端---</p>
+					</div>
+					<div class="playlist-side_main nuliya">
+												<h2>更多应用</h2>
+						<div class="play-tboxs">
+						<div class="play-tbox">
+							<a href="https://www.nuliya.top/mazanoke/" target="_blank">
+								<div class="play-tbox-icon"><img src="https://www.nuliya.top/mazanoke/favicon.ico" alt="mazanoke图标"></div>
+								<div class="play-tbox-txt">在线免费图像压缩与转换工具</div>
+								<div class="play-tbox-enter"><img src="img/enter.png" alt="icon"></div>
+							</a>
+						</div>
+						<div class="play-tbox">
+							<a href="https://www.nuliya.top/moodist/" target="_blank">
+								<div class="play-tbox-icon"><img src="https://www.nuliya.top/moodist/favicon.png" alt="moodist图标"></div>
+								<div class="play-tbox-txt">环境音效 - 专注与宁静之选</div>
+								<div class="play-tbox-enter"><img src="img/enter.png" alt="icon"></div>
+							</a>
+						</div>
+						<div class="play-tbox">
+							<a href="https://www.nuliya.top/pswd/" target="_blank">
+								<div class="play-tbox-icon"><img src="https://www.nuliya.top/pswd/favicon.svg" alt="PSWD图标"></div>
+								<div class="play-tbox-txt">PSWD - 创建强大且唯一的密码</div>
+								<div class="play-tbox-enter"><img src="img/enter.png" alt="icon"></div>
+							</a>
+						</div>
+						<div class="play-tbox">
+							<a href="https://www.nuliya.top/calmness/" target="_blank">
+								<div class="play-tbox-icon"><img src="https://www.nuliya.top/calmness/favicon-light.svg" alt="呼吸练习工具图标"></div>
+								<div class="play-tbox-txt">Calmness - 在线呼吸练习工具</div>
+								<div class="play-tbox-enter"><img src="img/enter.png" alt="icon"></div>
+							</a>
+						</div>
+						<div class="play-tbox">
+							<a href="https://www.nuliya.top/timesy/" target="_blank">
+								<div class="play-tbox-icon"><img src="https://www.nuliya.top/timesy/favicon.svg" alt="计时器图标"></div>
+								<div class="play-tbox-txt">Timesy - 番茄工作法在线计时器</div>
+								<div class="play-tbox-enter"><img src="img/enter.png" alt="icon"></div>
+							</a>
+						</div>
+						<div class="play-tbox">
+							<a href="https://www.nuliya.top/progress/" target="_blank">
+								<div class="play-tbox-icon"><img src="https://www.nuliya.top/progress/favicon.svg" alt="人生进度条图标"></div>
+								<div class="play-tbox-txt">Progress - 人生不过三万天，你的进度条到哪儿了?</div>
+								<div class="play-tbox-enter"><img src="img/enter.png" alt="icon"></div>
+							</a>
+						</div>
+						<div class="play-tbox">
+							<a href="https://www.nuliya.top/nothing/" target="_blank">
+								<div class="play-tbox-icon"><img src="https://www.nuliya.top/nothing/favicon.svg" alt="什么都不做图标"></div>
+								<div class="play-tbox-txt">Nothing - 简单地说，什么都不做</div>
+								<div class="play-tbox-enter"><img src="img/enter.png" alt="icon"></div>
+							</a>
+						</div>
+						<div class="play-tbox">
+							<a href="https://www.nuliya.top/sheng/" target="_blank">
+								<div class="play-tbox-icon"><img src="https://www.nuliya.top/sheng/favicon.png" alt="省省助手图标"></div>
+								<div class="play-tbox-txt">省省助手 - 领券下单购物更省钱</div>
+								<div class="play-tbox-enter"><img src="img/enter.png" alt="icon"></div>
+							</a>
+						</div>
+						<div class="play-tbox">
+							<a href="https://www.nuliya.top/games/" target="_blank">
+								<div class="play-tbox-icon"><img src="https://www.nuliya.top/games/fc-icon.png" alt="小霸王游戏机图标"></div>
+								<div class="play-tbox-txt">在线小霸王游戏机</div>
+								<div class="play-tbox-enter"><img src="img/enter.png" alt="icon"></div>
+							</a>
+						</div>
+						<div class="play-tbox">
+							<a href="https://pangdaxing.top/adobe" target="_blank">
+								<div class="play-tbox-icon"><img src="img/creative-cloud.png" alt="Adobe图标"></div>
+								<div class="play-tbox-txt">Adobe 2025 免费全家桶</div>
+								<div class="play-tbox-enter"><img src="img/enter.png" alt="icon"></div>
+							</a>
+						</div>
+						<div class="play-tbox">
+							<a href="https://www.nuliya.top/fc/" target="_blank">
+								<div class="play-tbox-icon"><img src="https://www.nuliya.top/fc/fc.png" alt="FC/NES游戏机"></div>
+								<div class="play-tbox-txt">FC/NES 游戏机模拟器</div>
+								<div class="play-tbox-enter"><img src="img/enter.png" alt="icon"></div>
+							</a>
+						</div>
+						</div>
+					</div>
+					<div class="playlist-side_main">
+						<h2>友情链接</h2>
+						<div class="playlist-item-pic">
+						<div class="playlist-item-logo">
+							<a href="http://www.iqiyi.com/" target="_blank" title="爱奇艺会员">
+								<img src="img/aiqiyi.png" alt="爱奇艺图标">
+							</a>
+						</div>
+						<div class="playlist-item-logo">
+							<a href="http://v.qq.com/" target="_blank" title="腾讯会员">
+								<img src="img/tencent.png" alt="腾讯视频图标">
+							</a>
+						</div>
+						<div class="playlist-item-logo">
+							<a href="http://www.youku.com/" target="_blank" title="优酷会员">
+								<img src="img/youku.png" alt="优酷图标">
+							</a>
+						</div>
+						<div class="playlist-item-logo">
+							<a href="http://www.mgtv.com/" target="_blank" title="芒果会员">
+								<img src="img/mgtv.png" alt="芒果tv图标">
+							</a>
+						</div>
+						<div class="playlist-item-logo">
+							<a href="http://www.bilibili.com/" target="_blank" title="哔哩哔哩">
+								<img src="img/bilibili.png" alt="bilibili图标">
+							</a>
+						</div>
+						<div class="playlist-item-logo">
+							<a href="http://www.acfun.cn/" target="_blank" title="Ac弹幕网">
+								<img src="img/acfun.png" alt="Ac弹幕网图标">
+							</a>
+						</div>
+												</div>
+					</div>
+				</div>
+			</div>
+	<footer class="footer">
+	    Copyright © 2024 努力鸭 &nbsp;912493745@qq.com &nbsp;All Rights Reserved &nbsp;本站所有接口均来自互联网，仅供学习交流使用。
+	</footer>
+
+<script type="text/javascript" src="js/tv-beipy.js?v=1.0.8"></script>
+		//判断F12审查元素
+function fuckyou() {
+	window.close(); //关闭当前窗口(防抽)
+	window.location = "about:blank"; //将当前窗口跳转置空白页
+}
+
+function ck() {
+	console.profile();
+	console.profileEnd();
+	//我们判断一下profiles里面有没有东西，如果有，肯定有人按F12了，没错！！
+	if(console.clear) {
+		console.clear()
+	};
+	if(typeof console.profiles == "object") {
+		return console.profiles.length > 0;
+	}
+}
+
+function hehe() {
+	if((window.console && (console.firebug || console.table && /firebug/i.test(console.table()))) || (typeof opera == 'object' && typeof opera.postError == 'function' && console.profile.length > 0)) {
+		fuckyou();
+	}
+	if(typeof console.profiles == "object" && console.profiles.length > 0) {
+		fuckyou();
+	}
+}
+hehe();
+window.onresize = function() {
+	if((window.outerHeight - window.innerHeight) > 200)
+		//判断当前窗口内页高度和窗口高度，如果差值大于200，那么呵呵
+		fuckyou();
+}
+</script>
+<script type="text/javascript" src="js/tv-beipy.js?v=1.0.8"></script>
+	</body>
 </html>
