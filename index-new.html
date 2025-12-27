@@ -7,32 +7,49 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#141414">
     <meta name="description" content="免费在线视频解析，支持爱奇艺、腾讯、优酷等多个平台">
-    <title>🎬 视频解析 - 在线播放</title>
+    <meta name="referrer" content="no-referrer">
+<meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=(), interest-cohort=()">
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  base-uri 'self';
+  object-src 'none';
+  img-src 'self' data: https:;
+  style-src 'self' 'unsafe-inline';
+  script-src 'self' 'unsafe-inline';
+  frame-src https:;
+  connect-src 'self' https:;
+  manifest-src 'self';
+  worker-src 'self';
+  upgrade-insecure-requests;
+">
+<title>🎬 视频解析 - 在线播放</title>
     <link rel="manifest" href="manifest.json" />
     
-    <!-- 预连接到CDN和API域名 -->
-    <link rel="preconnect" href="https://jx.xmflv.com" crossorigin />
-    <link rel="preconnect" href="https://jx.nnxv.cn" crossorigin />
-    <link rel="dns-prefetch" href="https://jx.m3u8.tv" />
-    <link rel="dns-prefetch" href="https://jx.xmflv.cc" />
-    <link rel="dns-prefetch" href="https://jx.playerjy.com" />
-    <link rel="dns-prefetch" href="https://okjx.cc" />
-    
-    <!-- 字体优化：使用 system font stack，避免加载自定义字体 -->
-    <style>
-        /* 定义系统字体堆栈和 Unicode Range 分割 */
-        @font-face {
-            font-family: 'system-ui';
-            src: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        }
-    </style>
-    
-    <link rel="stylesheet" href="css/css.css?v=2.0.0" />
-    <style>
+    <!-- 资源提示：仅对默认/常用接口 preconnect，其余用 dns-prefetch，避免过多握手拖慢首屏 -->
+<link rel="preconnect" href="https://jx.xmflv.com" crossorigin>
+<link rel="preconnect" href="https://jx.nnxv.cn" crossorigin>
+<link rel="dns-prefetch" href="//jx.m3u8.tv">
+<link rel="dns-prefetch" href="//jx.xmflv.cc">
+<link rel="dns-prefetch" href="//jx.playerjy.com">
+<link rel="dns-prefetch" href="//okjx.cc">
+<style>
         /* 简化的样式，与css.css配合使用 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        html, body { 
+        
+/* 无障碍：隐藏但可被读屏读取 */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+html, body { 
             width: 100%;
             height: 100%;
             touch-action: manipulation;
@@ -53,18 +70,18 @@
         .header { 
             text-align: center; 
             padding: 20px 0 15px 0; 
-            border-bottom: 2px solid #333; 
+            border-bottom: 2px solid var(--border); 
             margin-bottom: 20px;
         }
         
         .header h1 { 
             font-size: clamp(1.5em, 5vw, 2.5em); 
             margin-bottom: 8px; 
-            color: #00d4ff; 
+            color: var(--primary); 
             text-shadow: 0 0 10px rgba(0,212,255,0.3);
         }
         
-        .header p { font-size: clamp(0.9em, 3vw, 1.1em); color: #aaa; }
+        .header p { font-size: clamp(0.9em, 3vw, 1.1em); color: var(--text-sub); }
         
         .search-box { 
             margin: 20px 0; 
@@ -77,8 +94,8 @@
         input, select { 
             padding: 14px 12px; 
             border-radius: 8px; 
-            border: 2px solid #333;
-            background: #1a1a1a;
+            border: 2px solid var(--border);
+            background: var(--panel);
             color: #fff;
             font-size: 16px;
             -webkit-appearance: none;
@@ -86,7 +103,7 @@
         }
         
         input { flex: 1; min-width: 200px; }
-        input:focus, select:focus { outline: none; border-color: #00d4ff; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); }
         
         select { min-width: 120px; }
         
@@ -118,7 +135,7 @@
         .api-status-bar {
             margin: 15px 0;
             padding: 15px;
-            background: #1a1a1a;
+            background: var(--panel);
             border-radius: 8px;
             border-left: 4px solid #ff6b6b;
         }
@@ -150,7 +167,7 @@
         
         .api-item {
             padding: 10px;
-            background: #0a0a0a;
+            background: var(--panel2);
             border-radius: 6px;
             border-left: 3px solid #666;
             display: flex;
@@ -233,7 +250,7 @@
         .quick-actions {
             margin: 15px 0;
             padding: 10px;
-            background: #1a1a1a;
+            background: var(--panel);
             border-radius: 8px;
             display: flex;
             gap: 8px;
@@ -259,7 +276,7 @@
         .quick-btn:hover {
             background: #00d4ff;
             color: #000;
-            border-color: #00d4ff;
+            border-color: var(--primary);
         }
         
         .notification {
@@ -291,17 +308,17 @@
         
         .info { 
             margin-top: 20px; 
-            background: #0a0a0a; 
+            background: var(--panel2); 
             padding: 15px; 
             border-radius: 8px;
-            border: 1px solid #333;
+            border: 1px solid var(--border);
         }
         
         h2 { 
             margin: 15px 0 8px 0; 
             font-size: clamp(1.1em, 3vw, 1.3em);
-            color: #00d4ff;
-            border-bottom: 2px solid #333;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
             padding-bottom: 6px;
         }
         
@@ -331,6 +348,49 @@
             .header h1 { margin-bottom: 4px; }
             .player { max-height: 350px; }
         }
+
+:root{
+    --bg0: #0f0f0f;
+    --bg1: #1a1a1a;
+    --panel: #1a1a1a;
+    --panel2: #0a0a0a;
+    --border: #333;
+    --primary: #00d4ff;
+    --text-sub: #aaa;
+}
+
+/* iPhone 刘海/安全区适配 */
+body{
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.container{
+    padding-left: max(15px, env(safe-area-inset-left));
+    padding-right: max(15px, env(safe-area-inset-right));
+}
+
+/* 仅在键盘导航时显示焦点框 */
+input:focus, select:focus { outline: none; }
+input:focus-visible, select:focus-visible, button:focus-visible, .quick-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* 触屏设备避免 hover 粘滞 */
+@media (hover: hover) and (pointer: fine) {
+    button:hover { 
+        transform: translateY(-2px);
+    }
+    .quick-btn:hover { transform: translateY(-1px); }
+}
+
+/* 尊重“减少动态效果”设置 */
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+
+/* Toast 不拦截点击 */
+.notification { pointer-events: none; }
+
     </style>
 </head>
 <body>
@@ -343,14 +403,14 @@
         <!-- 接口状态检测 -->
         <div class="api-status-bar">
             <h3><span class="status-dot"></span>接口状态检测</h3>
-            <div class="api-list" id="apiList"></div>
+            <div class="api-list" id="apiList" aria-live="polite" aria-label="接口检测结果"></div>
             <button class="check-btn" onclick="checkAllApis()">🔍 检测所有接口</button>
         </div>
         
         <!-- 搜索框 -->
         <div class="search-box">
-            <input type="text" id="url" placeholder="粘贴视频网址到此处" autocomplete="off">
-            <select id="jk"></select>
+            <label for="url" class="sr-only">视频链接</label>
+            <input type="url" id="url" inputmode="url" enterkeyhint="go" spellcheck="false" autocomplete="off" placeholder="粘贴视频网址到此处"><select id="jk"></select>
             <button onclick="play()">▶ 解析播放</button>
         </div>
         
@@ -362,11 +422,11 @@
         </div>
         
         <!-- 播放器 -->
-        <div class="player" id="playerContainer">
+        <div class="player" id="playerContainer" aria-busy="true">
             <div class="player-skeleton" id="playerSkeleton">
                 <div class="skeleton-bar skeleton-pulse"></div>
             </div>
-            <iframe id="playbox" src="about:blank" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-modals allow-fullscreen" onload="hideSkeleton()"></iframe>
+            <iframe id="playbox" src="about:blank" allowfullscreen loading="lazy" referrerpolicy="no-referrer" allow="autoplay; fullscreen" sandbox="allow-scripts allow-forms allow-same-origin" onload="hideSkeleton()"></iframe>
         </div>
         
         <!-- 使用说明 -->
@@ -385,10 +445,10 @@
     </div>
 
     <!-- 加载所有模块（无jQuery依赖） -->
-    <script src="js/utils.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/ui.js"></script>
+    <script src="js/utils.js" defer></script>
+    <script src="js/api.js" defer></script>
+    <script src="js/player.js" defer></script>
+    <script src="js/ui.js" defer></script>
     
     <!-- 初始化应用 -->
     <script>
@@ -397,6 +457,8 @@
             const skeleton = document.getElementById('playerSkeleton');
             if (skeleton) {
                 skeleton.style.display = 'none';
+                const pc = document.getElementById('playerContainer');
+                if (pc) pc.setAttribute('aria-busy','false');
             }
         }
         
@@ -405,6 +467,8 @@
             const skeleton = document.getElementById('playerSkeleton');
             if (skeleton) {
                 skeleton.style.display = 'flex';
+                const pc = document.getElementById('playerContainer');
+                if (pc) pc.setAttribute('aria-busy','true');
             }
         }
         
@@ -487,6 +551,69 @@
                 console.log('浏览器不支持 Web Vitals API');
             }
         });
+// 动态 preconnect：在真正播放前再预连接用户选择的接口，避免首屏过多握手
+function ensurePreconnect(origin) {
+    try {
+        const id = 'pc_' + origin.replace(/[^a-z0-9]/gi, '_');
+        if (document.getElementById(id)) return;
+        const link = document.createElement('link');
+        link.id = id;
+        link.rel = 'preconnect';
+        link.href = origin;
+        link.crossOrigin = 'anonymous';
+        document.head.appendChild(link);
+    } catch (_) {}
+}
+
+// 基础 URL 校验：仅允许 http/https，拦截 javascript:/data: 等
+function isSafeHttpUrl(value) {
+    try {
+        const u = new URL(value.trim());
+        return u.protocol === 'http:' || u.protocol === 'https:';
+    } catch (e) {
+        return false;
+    }
+}
+
+// 绑定回车解析
+document.addEventListener('DOMContentLoaded', () => {
+    const urlInput = document.getElementById('url');
+    if (urlInput) {
+        urlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (typeof window.play === 'function') window.play();
+            }
+        });
+    }
+});
+
+// 包装 play()：播放前做校验 + 显示骨架屏 + 动态 preconnect
+window.addEventListener('DOMContentLoaded', () => {
+    const originalPlay = window.play;
+    if (typeof originalPlay === 'function') {
+        window.play = function() {
+            const urlEl = document.getElementById('url');
+            const apiEl = document.getElementById('jk');
+            const raw = urlEl ? urlEl.value : '';
+            if (!raw || !isSafeHttpUrl(raw)) {
+                if (typeof UI !== 'undefined' && UI && typeof UI.notify === 'function') {
+                    UI.notify('请输入有效的 http/https 视频链接');
+                } else {
+                    alert('请输入有效的 http/https 视频链接');
+                }
+                return;
+            }
+            // 动态预连接当前选择的接口
+            if (apiEl && apiEl.value) {
+                try { ensurePreconnect(new URL(apiEl.value).origin); } catch (_) {}
+            }
+            showSkeleton();
+            return originalPlay.apply(this, arguments);
+        };
+    }
+});
+
     </script>
 </body>
 </html>
