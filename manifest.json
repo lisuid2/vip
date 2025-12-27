@@ -1,0 +1,49 @@
+{
+  "name": "视频解析 - 在线播放",
+  "short_name": "视频解析",
+  "description": "免费在线视频解析，支持爱奇艺、腾讯、优酷等多个平台",
+  "start_url": "/index-new.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#141414",
+  "theme_color": "#00d4ff",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23141414' width='192' height='192'/><text x='96' y='110' font-size='100' fill='%2300d4ff' text-anchor='middle' font-weight='bold'>🎬</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23141414' width='192' height='192'/><text x='96' y='110' font-size='100' fill='%2300d4ff' text-anchor='middle' font-weight='bold'>🎬</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23141414' width='540' height='720'/><text x='270' y='360' font-size='120' fill='%2300d4ff' text-anchor='middle'>视频解析</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["entertainment", "video"],
+  "shortcuts": [
+    {
+      "name": "开始解析",
+      "short_name": "解析",
+      "description": "快速打开视频解析",
+      "url": "/index-new.html",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%23141414' width='96' height='96'/><text x='48' y='60' font-size='50' fill='%2300d4ff' text-anchor='middle'>▶</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}

@@ -47,6 +47,44 @@ const Storage = {
       console.warn('本地存储清空失败:', e);
       return false;
     }
+  },
+
+  // 带过期时间的设置（TTL缓存）
+  setWithTTL(key, value, ttlMinutes = 60) {
+    try {
+      const data = {
+        value: value,
+        timestamp: Date.now(),
+        ttl: ttlMinutes * 60 * 1000
+      };
+      localStorage.setItem(key, JSON.stringify(data));
+      return true;
+    } catch (e) {
+      console.warn('本地存储失败:', e);
+      return false;
+    }
+  },
+
+  // 获取带有过期检查的值
+  getWithTTL(key, defaultValue) {
+    try {
+      const item = localStorage.getItem(key);
+      if (!item) return defaultValue;
+      
+      const data = JSON.parse(item);
+      const now = Date.now();
+      
+      // 检查是否过期
+      if (now - data.timestamp > data.ttl) {
+        localStorage.removeItem(key); // 删除过期数据
+        return defaultValue;
+      }
+      
+      return data.value;
+    } catch (e) {
+      console.warn('本地存储读取失败:', e);
+      return defaultValue;
+    }
   }
 };
 

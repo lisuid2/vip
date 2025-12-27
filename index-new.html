@@ -8,6 +8,25 @@
     <meta name="theme-color" content="#141414">
     <meta name="description" content="免费在线视频解析，支持爱奇艺、腾讯、优酷等多个平台">
     <title>🎬 视频解析 - 在线播放</title>
+    <link rel="manifest" href="manifest.json" />
+    
+    <!-- 预连接到CDN和API域名 -->
+    <link rel="preconnect" href="https://jx.xmflv.com" crossorigin />
+    <link rel="preconnect" href="https://jx.nnxv.cn" crossorigin />
+    <link rel="dns-prefetch" href="https://jx.m3u8.tv" />
+    <link rel="dns-prefetch" href="https://jx.xmflv.cc" />
+    <link rel="dns-prefetch" href="https://jx.playerjy.com" />
+    <link rel="dns-prefetch" href="https://okjx.cc" />
+    
+    <!-- 字体优化：使用 system font stack，避免加载自定义字体 -->
+    <style>
+        /* 定义系统字体堆栈和 Unicode Range 分割 */
+        @font-face {
+            font-family: 'system-ui';
+            src: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+    </style>
+    
     <link rel="stylesheet" href="css/css.css?v=2.0.0" />
     <style>
         /* 简化的样式，与css.css配合使用 */
@@ -176,6 +195,37 @@
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
             width: 100%;
+            position: relative;
+        }
+        
+        .player-skeleton {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+            background-size: 200% 100%;
+            animation: skeleton-load 1.5s infinite;
+            z-index: 10;
+        }
+        
+        .skeleton-bar {
+            width: 100%;
+            height: 100%;
+            background: inherit;
+        }
+        
+        .skeleton-pulse {
+            animation: skeleton-load 1.5s infinite;
+        }
+        
+        @keyframes skeleton-load {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
         
         iframe { width: 100%; height: 100%; border: none; border-radius: 8px; }
@@ -312,8 +362,11 @@
         </div>
         
         <!-- 播放器 -->
-        <div class="player">
-            <iframe id="playbox" src="about:blank"></iframe>
+        <div class="player" id="playerContainer">
+            <div class="player-skeleton" id="playerSkeleton">
+                <div class="skeleton-bar skeleton-pulse"></div>
+            </div>
+            <iframe id="playbox" src="about:blank" onload="hideSkeleton()"></iframe>
         </div>
         
         <!-- 使用说明 -->
@@ -339,6 +392,35 @@
     
     <!-- 初始化应用 -->
     <script>
+        // 隐藏骨架屏
+        function hideSkeleton() {
+            const skeleton = document.getElementById('playerSkeleton');
+            if (skeleton) {
+                skeleton.style.display = 'none';
+            }
+        }
+        
+        // 显示骨架屏
+        function showSkeleton() {
+            const skeleton = document.getElementById('playerSkeleton');
+            if (skeleton) {
+                skeleton.style.display = 'flex';
+            }
+        }
+        
+        // 注册 Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('✓ Service Worker 已注册:', registration);
+                    })
+                    .catch((error) => {
+                        console.error('✗ Service Worker 注册失败:', error);
+                    });
+            });
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             // 初始化各个模块
             API.init();
@@ -347,6 +429,63 @@
             
             // 自动检测接口
             setTimeout(() => API.checkAll(), 500);
+        });
+        
+        // 性能监测和日志
+        window.addEventListener('load', function() {
+            if (window.performance && window.performance.timing) {
+                const timing = window.performance.timing;
+                const pageLoadTime = timing.loadEventEnd - timing.navigationStart;
+                const dnsTime = timing.domainLookupEnd - timing.domainLookupStart;
+                const tcpTime = timing.connectEnd - timing.connectStart;
+                const ttfb = timing.responseStart - timing.navigationStart;
+                const renderTime = timing.domContentLoadedEventEnd - timing.navigationStart;
+                
+                const metrics = {
+                    '页面加载时间': pageLoadTime + 'ms',
+                    'DNS查询时间': dnsTime + 'ms',
+                    'TCP连接时间': tcpTime + 'ms',
+                    '首字节时间(TTFB)': ttfb + 'ms',
+                    'DOM加载时间': renderTime + 'ms'
+                };
+                
+                console.log('📊 性能指标:', metrics);
+                Storage.setWithTTL('performanceMetrics', metrics, 24 * 60);
+            }
+            
+            // Web Vitals 监测
+            try {
+                // LCP (Largest Contentful Paint)
+                const lcpObserver = new PerformanceObserver((list) => {
+                    const entries = list.getEntries();
+                    const lastEntry = entries[entries.length - 1];
+                    console.log('📊 LCP (最大内容绘制):', Math.round(lastEntry.renderTime || lastEntry.loadTime) + 'ms');
+                });
+                lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+                
+                // FID (First Input Delay)
+                const fidObserver = new PerformanceObserver((list) => {
+                    const entries = list.getEntries();
+                    entries.forEach((entry) => {
+                        console.log('📊 FID (首次输入延迟):', Math.round(entry.processingDuration) + 'ms');
+                    });
+                });
+                fidObserver.observe({ entryTypes: ['first-input'] });
+                
+                // CLS (Cumulative Layout Shift)
+                let clsValue = 0;
+                const clsObserver = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        if (!entry.hadRecentInput) {
+                            clsValue += entry.value;
+                        }
+                    }
+                    console.log('📊 CLS (累积布局偏移):', clsValue.toFixed(3));
+                });
+                clsObserver.observe({ entryTypes: ['layout-shift'] });
+            } catch (e) {
+                console.log('浏览器不支持 Web Vitals API');
+            }
         });
     </script>
 </body>
